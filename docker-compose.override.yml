@@ -1,0 +1,87 @@
+version: '3.4'
+
+services:
+
+  sqldata:
+    environment:
+      - SA_PASSWORD=Pass@word
+      - ACCEPT_EULA=Y
+    ports:
+      - "5433:1433"
+    volumes:
+      - taskmanager-sqldata:/var/opt/mssql
+
+  mongo:
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    ports:
+      - "27017:27017"
+    networks:
+      - MONGO
+    volumes:
+      - taskmanager-nosqldata:/data/db
+
+
+  mongo-express:
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: admin
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: "27017"
+    ports:
+      - "8081:8081"
+    networks:
+      - MONGO
+
+
+  identity.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+      - ConnectionString=Server=sqldata;Database=IdentityDb;User Id=sa;Password=Pass@word
+      - TaskApiClient=http://host.docker.internal:5106
+      - HabitApiClient=http://host.docker.internal:5107
+    ports:
+      - "5105:80"
+
+  task.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+      - ConnectionString=Server=sqldata;Database=TaskDb;User Id=sa;Password=Pass@word
+      - IdentityUrlExternal=http://host.docker.internal:5105
+      - IdentityUrl=http://host.docker.internal:5105
+    ports:
+      - "5106:80"
+
+  habit.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+      - ConnectionString=Server=sqldata;Database=HabitDb;User Id=sa;Password=Pass@word
+      - HangfireConnection=Server=sqldata;Database=HangfireDb;User Id=sa;Password=Pass@word
+      - IdentityUrlExternal=http://host.docker.internal:5105
+      - IdentityUrl=http://host.docker.internal:5105
+      - grpcTelegram=http://telegram.api:81
+    ports:
+      - "5107:80"
+
+  telegram.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+      - MongoConnectionString=mongodb://admin:admin@host.docker.internal:27017
+      - GRPC_PORT=81
+    ports:
+      - "80"
+
+volumes:
+  taskmanager-sqldata:
+    external: false
+  taskmanager-nosqldata:
+    external: false
+
+networks:
+  MONGO:
+    name: MONGO

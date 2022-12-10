@@ -1,0 +1,18 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "GrpcTelegram";
+
+package TelegramApi;
+
+service Telegram {
+	rpc SendMessage(TelegramRequest) returns(Empty) {};
+}
+
+message TelegramRequest {
+	string user_id = 1;
+	string message = 2;
+}
+
+message Empty {
+
+}

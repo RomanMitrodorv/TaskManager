@@ -1,0 +1,53 @@
+version: '3.4'
+
+services:
+  sqldata:
+    image: mcr.microsoft.com/mssql/server:2019-latest 
+    container_name: ${DOCKER_REGISTRY-}sqldata
+
+  mongo:
+    image: mongo:latest
+    container_name: ${DOCKER_REGISTRY-}mongo
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: ${DOCKER_REGISTRY-}mongo-express
+    depends_on:
+      - mongo
+
+  identity.api:
+    image: ${DOCKER_REGISTRY-}identityapi
+    build:
+      context: .
+      dockerfile: Identity.API\Dockerfile
+    container_name: identityapi
+    depends_on:
+      - sqldata
+
+  task.api:
+    image: ${DOCKER_REGISTRY-}taskapi
+    build:
+      context: .
+      dockerfile: Task.API\Dockerfile
+    container_name: taskapi
+    depends_on:
+      - sqldata
+
+  habit.api:
+    image: ${DOCKER_REGISTRY-}habitapi
+    build:
+      context: .
+      dockerfile: Habit.API\Dockerfile
+    container_name: habitapi
+    depends_on:
+      - sqldata
+
+  telegram.api:
+    image: ${DOCKER_REGISTRY-}telegramapi
+    build:
+      context: .
+      dockerfile: Telegram.API\Dockerfile
+    container_name: telegramapi
+    depends_on:
+      - mongo
+

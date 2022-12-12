@@ -50,6 +50,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://0.0.0.0:80
       - ConnectionString=Server=sqldata;Database=TaskDb;User Id=sa;Password=Pass@word
+      - HangfireConnection=Server=sqldata;Database=HangfireDb;User Id=sa;Password=Pass@word
       - IdentityUrlExternal=http://host.docker.internal:5105
       - IdentityUrl=http://host.docker.internal:5105
     ports:

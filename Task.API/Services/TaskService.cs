@@ -8,30 +8,40 @@ namespace Task.API.Services
     public class TaskService : ITaskService
     {
         private readonly TaskContext _taskContext;
-        public TaskService(TaskContext taskContext)
+        private readonly ILogger<TaskService> _logger;
+
+        public TaskService(TaskContext taskContext, ILogger<TaskService> logger)
         {
             _taskContext = taskContext ?? throw new ArgumentNullException(nameof(taskContext));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async System.Threading.Tasks.Task DeactivateOldTasks()
         {
-            using var transaction = await _taskContext.Database.BeginTransactionAsync();
+            var executionStrategy = _taskContext.Database.CreateExecutionStrategy();
 
-            try
+            await executionStrategy.ExecuteAsync(async () =>
             {
-                _taskContext.Tasks
-                    .Include(x => x.Status)
-                    .Where(q => q.Status.Code == "Completed")
-                    .ToList()
-                    .ForEach(task => { task.IsActive = false; });
+                using var transaction = await _taskContext.Database.BeginTransactionAsync();
 
-                await _taskContext.SaveChangesAsync();
-                await transaction.CommitAsync();
+                try
+                {
+                    _taskContext.Tasks
+                        .Include(x => x.Status)
+                        .Where(q => q.Status.Code == "Completed")
+                        .ToList()
+                        .ForEach(task => { task.IsActive = false; });
+
+                    await _taskContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error updating completed tasks to inactive");
+                    await transaction.RollbackAsync();
+                }
             }
-            catch (Exception)
-            {
-                await transaction.RollbackAsync();
-            }
+            );
         }
     }
 }

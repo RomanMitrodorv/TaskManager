@@ -20,7 +20,7 @@
 
             if (Name.Length < 3)
                 results.Add(new ValidationResult("The number of characters must be greater than 3", new[] { "Name" }));
-            if (Date < DateTime.Now)
+            if (DateOnly.FromDateTime(Date) < DateOnly.FromDateTime(DateTime.Now))
                 results.Add(new ValidationResult("The date must not be less than the current one", new[] { "Date" }));
 
             return results;

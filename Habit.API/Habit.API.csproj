@@ -55,6 +55,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+      <ProjectReference Include="..\..\Hangfire\Hangfire.csproj" />
       <ProjectReference Include="..\WebHost.Customization\WebHost.Customization.csproj" />
     </ItemGroup>
 

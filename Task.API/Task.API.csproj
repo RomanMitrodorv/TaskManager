@@ -11,6 +11,9 @@
   </ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Hangfire.Core" Version="1.7.*" />
+		<PackageReference Include="Hangfire.SqlServer" Version="1.7.*" />
+		<PackageReference Include="Hangfire.AspNetCore" Version="1.7.*" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.8" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.0">
 		  <PrivateAssets>all</PrivateAssets>
@@ -50,7 +53,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\..\Hangfire\Hangfire.csproj" />
 	  <ProjectReference Include="..\WebHost.Customization\WebHost.Customization.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Infastructure\Migrations\" />
 	</ItemGroup>
 
 </Project>

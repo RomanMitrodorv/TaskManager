@@ -3,19 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Task.API.Infastructure;
 
 #nullable disable
 
-namespace Task.API.Infastructure.Migrations.TaskDb
+namespace Task.API.Infastructure.Migrations
 {
     [DbContext(typeof(TaskContext))]
-    [Migration("20221117195512_AddData")]
-    partial class AddData
+    partial class TaskContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,8 +42,11 @@ namespace Task.API.Infastructure.Migrations.TaskDb
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsCompleted")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<int>("ItemIndex")
+                        .HasColumnType("int");
 
                     b.Property<int>("LabelId")
                         .HasColumnType("int");
@@ -131,6 +132,9 @@ namespace Task.API.Infastructure.Migrations.TaskDb
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Code")
@@ -141,33 +145,24 @@ namespace Task.API.Infastructure.Migrations.TaskDb
                     b.HasData(
                         new
                         {
-                            Id = 1,
-                            Code = "doing",
-                            Name = "В работе"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Code = "blocked",
-                            Name = "Заблакировано"
-                        },
-                        new
-                        {
                             Id = 3,
                             Code = "created",
-                            Name = "Создано"
+                            Name = "Создано",
+                            SortOrder = 10
+                        },
+                        new
+                        {
+                            Id = 1,
+                            Code = "doing",
+                            Name = "В работе",
+                            SortOrder = 20
                         },
                         new
                         {
                             Id = 4,
                             Code = "completed",
-                            Name = "Выполнено"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Code = "future",
-                            Name = "В плане"
+                            Name = "Выполнено",
+                            SortOrder = 30
                         });
                 });
 

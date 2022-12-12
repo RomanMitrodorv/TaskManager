@@ -1,5 +1,8 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Hangfire;
+using Hangfire.Customization;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -23,7 +26,8 @@ namespace Task.API
         {
             services
                 .AddCustomDbContext(Configuration)
-                .AddSwagger(Configuration);
+                .AddSwagger(Configuration)
+                .AddHangfire(Configuration); 
 
             services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.WriteIndented = true);
 
@@ -31,6 +35,7 @@ namespace Task.API
 
             services.AddTransient<IIdentityService, IdentityService>();
 
+            services.AddTransient<ITaskService, TaskService>();
 
             services.AddCors(options =>
             {
@@ -68,6 +73,24 @@ namespace Task.API
                     c.OAuthAppName("Task Swagger UI");
                 });
 
+            var hangfire = Configuration.GetSection("HangfireCred").Get<HangfireOption>();
+
+            var options = new DashboardOptions
+            {
+                Authorization = new[] {
+                    new HangFireAuthorizationFilter(new[]
+                    {
+                        new HangfireUserCredentials
+                        {
+                            Username = hangfire.Username,
+                            Password = hangfire.Password
+                        }
+                    })
+                }
+            };
+
+            app.UseHangfireDashboard("/hangfire", options);
+
             app.UseRouting();
             app.UseCors("CorsPolicy");
             ConfigureAuth(app);
@@ -75,8 +98,15 @@ namespace Task.API
             {
                 endpoins.MapDefaultControllerRoute();
                 endpoins.MapControllers();
+                endpoins.MapHangfireDashboard();
             });
 
+            //Запускаем джоб на на каждый день
+            RecurringJob.AddOrUpdate<ITaskService>(
+                "DeactivateOldTasks.",
+                (x) => x.DeactivateOldTasks(),
+                "0 0 * * *",
+                TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time"));
         }
 
         private void ConfigureAuthService(IServiceCollection services)
@@ -112,6 +142,27 @@ namespace Task.API
 
     public static class StartupExtensions
     {
+        public static IServiceCollection AddHangfire(this IServiceCollection services, IConfiguration Configuration)
+        {
+            services.AddHangfire(configuration => configuration
+                    .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                    .UseSimpleAssemblyNameTypeSerializer()
+                    .UseRecommendedSerializerSettings()
+                    .UseSerilogLogProvider()
+                    .UseSqlServerStorage(Configuration["HangfireConnection"], new SqlServerStorageOptions
+                    {
+                        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                        QueuePollInterval = TimeSpan.Zero,
+                        UseRecommendedIsolationLevel = true,
+                        DisableGlobalLocks = true
+                    }));
+
+            services.AddHangfireServer();
+
+            return services;
+        }
+
         public static IServiceCollection AddCustomDbContext(this IServiceCollection services, IConfiguration Configuration)
         {
             services.AddDbContext<TaskContext>(options =>

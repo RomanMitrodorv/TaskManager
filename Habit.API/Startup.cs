@@ -2,11 +2,11 @@
 using Autofac.Extensions.DependencyInjection;
 using GrpcTelegram;
 using Habit.API.GrpcInterceptor;
-using Habit.API.Hangfire;
 using Habit.API.Infastructure;
 using Habit.API.Infrastructure.Filters;
 using Habit.API.Services;
 using Hangfire;
+using Hangfire.Customization;
 using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;

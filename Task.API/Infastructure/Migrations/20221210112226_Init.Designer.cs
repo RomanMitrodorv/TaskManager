@@ -9,11 +9,11 @@ using Task.API.Infastructure;
 
 #nullable disable
 
-namespace Task.API.Infastructure.Migrations.TaskDb
+namespace Task.API.Infastructure.Migrations
 {
     [DbContext(typeof(TaskContext))]
-    [Migration("20221129191321_AddSortOrder")]
-    partial class AddSortOrder
+    [Migration("20221210112226_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -44,7 +44,7 @@ namespace Task.API.Infastructure.Migrations.TaskDb
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsCompleted")
+                    b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<int>("ItemIndex")
@@ -165,13 +165,6 @@ namespace Task.API.Infastructure.Migrations.TaskDb
                             Code = "completed",
                             Name = "Выполнено",
                             SortOrder = 30
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Code = "future",
-                            Name = "В плане",
-                            SortOrder = 40
                         });
                 });
 

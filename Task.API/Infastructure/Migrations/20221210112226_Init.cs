@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Task.API.Infastructure.Migrations.TaskDb
+namespace Task.API.Infastructure.Migrations
 {
     public partial class Init : Migration
     {
@@ -39,7 +40,8 @@ namespace Task.API.Infastructure.Migrations.TaskDb
                 {
                     Id = table.Column<int>(type: "int", nullable: false),
                     Code = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    SortOrder = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -57,7 +59,8 @@ namespace Task.API.Infastructure.Migrations.TaskDb
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     StatusId = table.Column<int>(type: "int", nullable: false),
                     LabelId = table.Column<int>(type: "int", nullable: false),
-                    IsCompleted = table.Column<bool>(type: "bit", nullable: false)
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    ItemIndex = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -87,12 +90,12 @@ namespace Task.API.Infastructure.Migrations.TaskDb
 
             migrationBuilder.InsertData(
                 table: "TaskStatus",
-                columns: new[] { "Id", "Code", "Name" },
+                columns: new[] { "Id", "Code", "Name", "SortOrder" },
                 values: new object[,]
                 {
-                    { 1, "doing", "В работе" },
-                    { 2, "blocked", "Заблакировано" },
-                    { 3, "created", "Создано" }
+                    { 1, "doing", "В работе", 20 },
+                    { 3, "created", "Создано", 10 },
+                    { 4, "completed", "Выполнено", 30 }
                 });
 
             migrationBuilder.CreateIndex(

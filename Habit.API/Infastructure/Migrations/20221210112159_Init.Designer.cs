@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Habit.API.Infastructure.Migrations
 {
     [DbContext(typeof(HabitContext))]
-    [Migration("20221209142422_Init")]
+    [Migration("20221210112159_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

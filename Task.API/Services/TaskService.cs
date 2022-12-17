@@ -27,17 +27,16 @@ namespace Task.API.Services
                 try
                 {
                     _taskContext.Tasks
-                        .Include(x => x.Status)
-                        .Where(q => q.Status.Code == "Completed")
+                        .Where(q => q.Completed == false && q.Date < DateTime.Now)
                         .ToList()
-                        .ForEach(task => { task.IsActive = false; });
+                        .ForEach(task => { task.Date = DateTime.Now.Date; });
 
                     await _taskContext.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error updating completed tasks to inactive");
+                    _logger.LogError(ex, "Error updating completed tasks");
                     await transaction.RollbackAsync();
                 }
             }

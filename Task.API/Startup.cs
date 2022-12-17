@@ -102,6 +102,7 @@ namespace Task.API
             });
 
             //Запускаем джоб на на каждый день
+            //Задачи, которые не успели выполнить за сегодня перекидываем на завтра
             RecurringJob.AddOrUpdate<ITaskService>(
                 "DeactivateOldTasks.",
                 (x) => x.DeactivateOldTasks(),

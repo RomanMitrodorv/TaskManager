@@ -14,8 +14,6 @@
 
             builder.Property(x => x.Id).UseHiLo("scheduled_task_hilo").IsRequired();
 
-            builder.HasOne(x => x.Status).WithMany().HasForeignKey(q => q.StatusId);
-
             builder.HasOne(x => x.Label).WithMany().HasForeignKey(q => q.LabelId);
         }
     }

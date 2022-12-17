@@ -7,12 +7,11 @@
         public string Name { get; set; }
         public string? Notes { get; set; }
         public DateTime Date { get; set; }
-        public virtual TaskStatus? Status { get; set; }
-        public int StatusId { get; set; }
         public virtual TaskLabel? Label { get; set; }
         public int LabelId { get; set; }
-        public bool IsActive { get; set; }
+        public bool Completed { get; set; }
         public int ItemIndex { get; set; }
+        public virtual List<Subtask> Subtasks { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

@@ -28,9 +28,8 @@ namespace Task.API.Controllers
         {
             var userId = Guid.Parse(_identityService.GetUserIdentity());
 
-            var tasks = await _taskContext.Tasks.Where(x => x.UserId == userId && x.IsActive == true)
+            var tasks = await _taskContext.Tasks.Where(x => x.UserId == userId)
                                                 .Include(x => x.Label)
-                                                .Include(x => x.Status)
                                                 .OrderBy(x => x.ItemIndex)
                                                 .ThenBy(x => x.Date)
                                                 .ToListAsync();
@@ -45,7 +44,7 @@ namespace Task.API.Controllers
         public async Task<ActionResult<List<ScheduledTask>>> TasksByDateAsync(DateTime date)
         {
             var userId = Guid.Parse(_identityService.GetUserIdentity());
-            var tasks = await _taskContext.Tasks.Where(x => x.UserId == userId && x.Date.Date == date.Date && x.IsActive == true)
+            var tasks = await _taskContext.Tasks.Where(x => x.UserId == userId && x.Date.Date == date.Date)
                                                 .OrderBy(x => x.ItemIndex)
                                                 .ThenBy(x => x.Date)
                                                 .ToListAsync();
@@ -54,13 +53,6 @@ namespace Task.API.Controllers
             return tasks;
         }
 
-        [HttpGet]
-        [Route("taskstatus")]
-        [ProducesResponseType(typeof(List<Model.TaskStatus>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<List<Model.TaskStatus>>> GetTaskStatusAsync()
-        {
-            return await _taskContext.TaskStatus.OrderBy(x => x.SortOrder).ToListAsync();
-        }
 
         [HttpGet]
         [Route("tasklabel")]
@@ -91,7 +83,7 @@ namespace Task.API.Controllers
 
             task.Date = taskForUpdate.Date;
             task.LabelId = taskForUpdate.LabelId;
-            task.StatusId = taskForUpdate.StatusId;
+            task.Completed = taskForUpdate.Completed;
             task.Notes = taskForUpdate.Notes;
             task.Name = taskForUpdate.Name;
             task.ItemIndex = taskForUpdate.ItemIndex;
@@ -133,11 +125,7 @@ namespace Task.API.Controllers
         {
             var userId = Guid.Parse(_identityService.GetUserIdentity());
 
-            var initStatus = await _taskContext.TaskStatus.Where(x => x.Code == "created")
-                                            .Select(x => x.Id)
-                                            .FirstOrDefaultAsync();
-
-            var maxItemIndex = await _taskContext.Tasks.Where(x => x.UserId == userId && x.StatusId == initStatus)
+            var maxItemIndex = await _taskContext.Tasks.Where(x => x.UserId == userId && x.Completed == false)
                                                  .OrderByDescending(x => x.ItemIndex)
                                                  .Select(x => x.ItemIndex)
                                                  .FirstOrDefaultAsync();
@@ -145,10 +133,9 @@ namespace Task.API.Controllers
             var task = new ScheduledTask()
             {
                 Date = inputTask.Date,
-                IsActive = true,
+                Completed = false,
                 Name = inputTask.Name,
                 Notes = inputTask.Notes,
-                StatusId = initStatus,
                 UserId = userId,
                 LabelId = inputTask.LabelId,
                 ItemIndex = maxItemIndex + 1

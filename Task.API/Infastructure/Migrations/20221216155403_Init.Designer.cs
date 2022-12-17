@@ -12,7 +12,7 @@ using Task.API.Infastructure;
 namespace Task.API.Infastructure.Migrations
 {
     [DbContext(typeof(TaskContext))]
-    [Migration("20221210112226_Init")]
+    [Migration("20221216155403_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -30,9 +30,6 @@ namespace Task.API.Infastructure.Migrations
             modelBuilder.HasSequence("task_label_hilo")
                 .IncrementsBy(10);
 
-            modelBuilder.HasSequence("task_status_hilo")
-                .IncrementsBy(10);
-
             modelBuilder.Entity("Task.API.Model.ScheduledTask", b =>
                 {
                     b.Property<int>("Id")
@@ -41,11 +38,11 @@ namespace Task.API.Infastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseHiLo(b.Property<int>("Id"), "scheduled_task_hilo");
 
+                    b.Property<bool>("Completed")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
 
                     b.Property<int>("ItemIndex")
                         .HasColumnType("int");
@@ -61,17 +58,12 @@ namespace Task.API.Infastructure.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("StatusId")
-                        .HasColumnType("int");
-
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("LabelId");
-
-                    b.HasIndex("StatusId");
 
                     b.ToTable("Tasks");
                 });
@@ -116,58 +108,6 @@ namespace Task.API.Infastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Task.API.Model.TaskStatus", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseHiLo(b.Property<int>("Id"), "task_status_hilo");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.ToTable("TaskStatus", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 3,
-                            Code = "created",
-                            Name = "Создано",
-                            SortOrder = 10
-                        },
-                        new
-                        {
-                            Id = 1,
-                            Code = "doing",
-                            Name = "В работе",
-                            SortOrder = 20
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Code = "completed",
-                            Name = "Выполнено",
-                            SortOrder = 30
-                        });
-                });
-
             modelBuilder.Entity("Task.API.Model.ScheduledTask", b =>
                 {
                     b.HasOne("Task.API.Model.TaskLabel", "Label")
@@ -176,15 +116,7 @@ namespace Task.API.Infastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Task.API.Model.TaskStatus", "Status")
-                        .WithMany()
-                        .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Label");
-
-                    b.Navigation("Status");
                 });
 #pragma warning restore 612, 618
         }

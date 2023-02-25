@@ -27,7 +27,7 @@ namespace Habit.API
             Configuration = configuration;
         }
 
-        public IServiceProvider ConfigureServices(IServiceCollection services)
+        public virtual IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddTransient<GrpcExceptionInterceptor>();
 
